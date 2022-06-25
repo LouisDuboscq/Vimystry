@@ -20,7 +20,20 @@ class RealGetPostsService(/*val postsGraphQLApi: PostsGraphQLApi*/) : GetPostsSe
                     avatar = "https://i.pravatar.cc/150?u=74464",
                     title = "d7zesKQgVL"
                 )
+            ),
+            Post(
+                id = 3,
+                createdAt = "2021-08-15T15:09:43Z",
+                fileUrl = "https://vod-eurosport.akamaized.net/ebu-au/2019/12/08/snookfinish-1269077-700-512-288.mp4",
+                likes = 577687,
+                author = User(
+                    id = 2,
+                    avatar = "https://i.pravatar.cc/150?u=74465",
+                    title = "zdoubceaoi"
+                )
             )
+
+
         )
     }
 /*

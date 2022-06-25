@@ -62,6 +62,7 @@ dependencies {
     implementation("io.insert-koin:koin-android:$koin_version")
     implementation("io.insert-koin:koin-androidx-navigation:$koin_version")
     implementation("io.insert-koin:koin-androidx-compose:$koin_version")
+    implementation("com.google.android.exoplayer:exoplayer:2.17.1")
 
     debugImplementation("androidx.compose.ui:ui-test-manifest:$compose")
 

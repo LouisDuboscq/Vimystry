@@ -26,7 +26,7 @@ class MainViewModel(
 
     sealed interface ViewEffect {
         data class Error(val message: String) : ViewEffect
-        object Pause : ViewEffect
+        object PlayPause : ViewEffect
     }
 
     private val currentState: ViewState
@@ -35,8 +35,11 @@ class MainViewModel(
     private val _uiState: MutableStateFlow<ViewState> = MutableStateFlow(ViewState())
     val uiState = _uiState.asStateFlow()
 
-    private val _effect: Channel<ViewEffect> = Channel()
-    val effect = _effect.receiveAsFlow()
+    private val _playPause: Channel<ViewEffect.PlayPause> = Channel()
+    val playPause = _playPause.receiveAsFlow()
+
+    private val _errors: Channel<ViewEffect.Error> = Channel()
+    val errors = _errors.receiveAsFlow()
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -47,14 +50,14 @@ class MainViewModel(
                     currentPost = posts.firstOrNull()
                 )
             } catch (e: Exception) {
-                viewModelScope.launch {
-                    _effect.send(ViewEffect.Error(e.message ?: ""))
+                viewModelScope.launch(Dispatchers.Main) {
+                    _errors.send(ViewEffect.Error(e.message ?: ""))
                 }
             }
         }
     }
 
-    fun userTappedRight() {
+    fun nextVideo() {
         if (currentState.posts.isNotEmpty() &&
             currentState.currentPostIndex != currentState.posts.size - 1
         ) {
@@ -66,7 +69,7 @@ class MainViewModel(
         }
     }
 
-    fun userTappedLeft() {
+    fun previousVideo() {
         var newIndex = currentState.currentPostIndex - 1
         if (newIndex < 0) {
             newIndex = 0
@@ -87,7 +90,7 @@ class MainViewModel(
     fun userLongPressed() {
         _uiState.value = currentState.copy(pausedState = !currentState.pausedState)
         viewModelScope.launch {
-            _effect.send(ViewEffect.Pause)
+            _playPause.send(ViewEffect.PlayPause)
         }
     }
 }

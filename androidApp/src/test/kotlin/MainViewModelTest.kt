@@ -5,12 +5,9 @@ import com.lduboscq.vimystry.remote.User
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class MainViewModelTest {
@@ -23,9 +20,9 @@ class MainViewModelTest {
     fun userTappedLeftAndRightForEmptyListTest() {
         val viewModel = MainViewModel(getPostsService = createPostService(emptyList()))
         assertEquals(0, viewModel.uiState.value.currentPostIndex)
-        viewModel.userTappedLeft()
+        viewModel.previousVideo()
         assertEquals(0, viewModel.uiState.value.currentPostIndex)
-        viewModel.userTappedRight()
+        viewModel.nextVideo()
         assertEquals(0, viewModel.uiState.value.currentPostIndex)
     }
 
@@ -47,7 +44,7 @@ class MainViewModelTest {
         assertTrue(viewModel.uiState.value.posts.isNotEmpty())
         assertEquals(0, viewModel.uiState.value.currentPostIndex)
         assertEquals(post, viewModel.uiState.value.currentPost)
-        viewModel.userTappedRight()
+        viewModel.nextVideo()
         assertEquals(0, viewModel.uiState.value.currentPostIndex)
         assertEquals(post, viewModel.uiState.value.currentPost)
     }
@@ -81,10 +78,10 @@ class MainViewModelTest {
         assertTrue(viewModel.uiState.value.posts.isNotEmpty())
         assertEquals(0, viewModel.uiState.value.currentPostIndex)
         assertEquals(post, viewModel.uiState.value.currentPost)
-        viewModel.userTappedRight()
+        viewModel.nextVideo()
         assertEquals(1, viewModel.uiState.value.currentPostIndex)
         assertEquals(post2, viewModel.uiState.value.currentPost)
-        viewModel.userTappedLeft()
+        viewModel.previousVideo()
         assertEquals(0, viewModel.uiState.value.currentPostIndex)
         assertEquals(post, viewModel.uiState.value.currentPost)
     }

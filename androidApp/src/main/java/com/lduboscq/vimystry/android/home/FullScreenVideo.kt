@@ -23,46 +23,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 
 @Composable
-fun FullScreenVideo(post: Post) {
-    val context = LocalContext.current
-    val exoPlayer = remember {
-        SimpleExoPlayer.Builder(context).build().apply {
-            setMediaItem(
-                MediaItem.Builder()
-                    .setUri(post.fileUrl)
-                    /* .setMediaId(post.id.toString())
-                     .setTag(post.id)
-                     .setMediaMetadata(
-                         MediaMetadata.Builder()
-                             .setDisplayTitle(post.author.title)
-                             .build()
-                     )*/
-                    .build()
-            )
-
-            playWhenReady = true
-            this.prepare()
-        }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            exoPlayer.release()
-        }
-    }
-
-    AndroidView(
-        modifier = Modifier
-            .fillMaxSize(),
-        factory = { ctx ->
-            PlayerView(ctx).apply {
-                player = exoPlayer
-            }
-        }
-    )
-}
-
-@Composable
 fun VideoPlayer(
     post: Post,
     onMediaFinished: () -> Unit,

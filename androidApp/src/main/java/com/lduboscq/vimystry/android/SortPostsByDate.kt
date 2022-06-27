@@ -1,6 +1,6 @@
 package com.lduboscq.vimystry.android
 
-import com.lduboscq.vimystry.remote.Post
+import com.lduboscq.vimystry.domain.Post
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 

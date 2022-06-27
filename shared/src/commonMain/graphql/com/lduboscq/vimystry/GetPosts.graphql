@@ -1,0 +1,13 @@
+query GetPosts {
+   posts {
+       id
+       createdAt
+       fileURL
+       likes
+       author {
+           name
+           avatar
+           id
+       }
+   }
+}

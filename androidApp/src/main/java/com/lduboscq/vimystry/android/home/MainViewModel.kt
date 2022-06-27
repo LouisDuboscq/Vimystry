@@ -2,18 +2,26 @@ package com.lduboscq.vimystry.android.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lduboscq.vimystry.GetPostsService
-import com.lduboscq.vimystry.remote.Post
+import com.lduboscq.vimystry.domain.Post
+import com.lduboscq.vimystry.domain.PostsService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.Exception
 
 class MainViewModel(
-    private val getPostsService: GetPostsService
+    private val postsService: PostsService
 ) : ViewModel() {
 
     data class ViewState(
@@ -40,11 +48,48 @@ class MainViewModel(
 
     private val _errors: Channel<ViewEffect.Error> = Channel()
     val errors = _errors.receiveAsFlow()
+/*
+    val uiState = postsService.pollPosts()
+        .map {
+            ViewState(
+                loading = false,
+                pausedState = false,
+                currentPost = it.firstOrNull(),
+                posts = it,
+                currentPostIndex = 0
+            )
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ViewState())
+*/
+/*
+    data class PauseAndIndex(
+        val pausedState: Boolean = false,
+        val currentPostIndex: Int = 0
+    )
 
+    private val pauseAndIndex = MutableStateFlow(PauseAndIndex())
+
+    private val remotePosts: Flow<List<Post>> = postsService.pollPosts()
+        .onEach {
+            pauseAndIndex.value = pauseAndIndex.value.copy(
+                currentPostIndex = 0,
+                pausedState = false
+            )
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    init {
+        remotePosts.combine(pauseAndIndex) { posts, pai ->
+            _uiState.value = currentState.copy(
+                posts = posts,
+                currentPost = posts[pai.currentPostIndex],
+                loading = false
+            )
+        }*/
     init {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val posts = getPostsService()
+                val posts: List<Post> = postsService.getPosts()
                 _uiState.value = currentState.copy(
                     posts = posts,
                     currentPost = posts.firstOrNull()

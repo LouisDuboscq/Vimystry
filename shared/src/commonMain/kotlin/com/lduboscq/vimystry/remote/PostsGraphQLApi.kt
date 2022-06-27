@@ -1,56 +1,57 @@
 package com.lduboscq.vimystry.remote
-/*
-import org.koin.core.component.KoinComponent
+
 import com.apollographql.apollo3.ApolloClient
-import com.apollographql.apollo3.cache.normalized.api.MemoryCacheFactory
-import com.apollographql.apollo3.cache.normalized.normalizedCache
-*/
-// @Serializable
-data class Post(
-    val id: Long,
-    val createdAt: String,
-    val fileUrl: String,
-    val likes: Long,
-    val author: User
-)
+import com.lduboscq.vimystry.GetPostsQuery
+import com.lduboscq.vimystry.domain.Post
+import com.lduboscq.vimystry.domain.PostsService
+import com.lduboscq.vimystry.domain.User
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
-// @Serializable
-data class User(
-    val id: Long,
-    val avatar: String,
-    val title: String
-)
-/*
-@Serializable
-data class GraphQLResponse(val message: String, val iss_position: IssPosition, val timestamp: Long)
-*/
-/*
-class PostsGraphQLApi(
-    private val client: HttpClient,
-    var baseUrl: String = "https://mockend.com/theGlenn/fake-api/graphql",
-) : KoinComponent {
-
-
-
-    // Creates a 10MB MemoryCacheFactory
-    val cacheFactory = MemoryCacheFactory(maxSizeBytes = 10 * 1024 * 1024)
-
+class PostsGraphQLApi : PostsService {
 
     private val apolloClient = ApolloClient.Builder()
-        .serverUrl("https://rickandmortyapi.com/graphql")
-        .normalizedCache(cacheFactory)
+        .serverUrl(SERVER_URL)
         .build()
-/*
-    suspend fun getPosts(page: Int): GetCharactersQuery.Characters {
-        val response = apolloClient.query(GetCharactersQuery(page)).execute()
-        return response.dataAssertNoErrors.characters
+
+    companion object {
+        private const val SERVER_URL = "https://mockend.com/theGlenn/fake-api/graphql"
+        private const val POLL_INTERVAL = 300_000L // 5 min
     }
 
-    suspend fun getCharacter(characterId: String): CharacterDetail {
-        val response = apolloClient.query(GetCharacterQuery(characterId)).execute()
-        return response.dataAssertNoErrors.character.characterDetail
-    }*/
+    override suspend fun getPosts(): List<Post> {
+        val response = apolloClient.query(GetPostsQuery()).execute()
+        return response.dataAssertNoErrors
+            .posts
+            ?.mapNotNull { it?.toPost() }
+            ?: throw NoBackendDataException()
+    }
 
-   // suspend fun fetchISSPosition() = client.get(baseUrl).body<GraphQLResponse>()
+    override fun pollPosts(): Flow<List<Post>> {
+        return flow {
+            while (true) {
+                val posts = getPosts()
+                emit(posts)
+                delay(POLL_INTERVAL)
+            }
+        }
+    }
 }
- */
+
+private fun GetPostsQuery.Post.toPost(): Post {
+    return Post(
+        id = id?.toLongOrNull() ?: throw CannotParseBackendDataException(),
+        createdAt = createdAt ?: throw CannotParseBackendDataException(),
+        fileUrl = fileURL ?: throw CannotParseBackendDataException(),
+        likes = likes?.toLong() ?: throw CannotParseBackendDataException(),
+        author = User(
+            id = author?.id?.toLongOrNull() ?: throw CannotParseBackendDataException(),
+            title = author.name ?: throw CannotParseBackendDataException(),
+            avatar = author.avatar ?: throw CannotParseBackendDataException(),
+        )
+    )
+}
+
+class CannotParseBackendDataException : Exception()
+class NoBackendDataException : Exception()

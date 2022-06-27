@@ -1,8 +1,8 @@
 package com.lduboscq.vimystry.di
 
-import com.lduboscq.vimystry.GetPostsService
-import com.lduboscq.vimystry.RealGetPostsService
+import com.lduboscq.vimystry.domain.PostsService
 import com.lduboscq.vimystry.platformModule
+import com.lduboscq.vimystry.remote.PostsGraphQLApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -18,5 +18,5 @@ fun initKoin(appDeclaration: KoinAppDeclaration = {}) =
 
 fun commonModule() = module {
     single { CoroutineScope(Dispatchers.Default + SupervisorJob()) }
-    single<GetPostsService> { RealGetPostsService() }
+    single<PostsService> { PostsGraphQLApi() }
 }

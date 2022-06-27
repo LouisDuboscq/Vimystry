@@ -1,4 +1,4 @@
-import com.lduboscq.vimystry.GetPostsService
+import com.lduboscq.vimystry.domain.GetPostsService
 import com.lduboscq.vimystry.android.home.MainViewModel
 import com.lduboscq.vimystry.remote.Post
 import com.lduboscq.vimystry.remote.User

@@ -1,6 +1,5 @@
 package com.lduboscq.vimystry
 
-import com.lduboscq.vimystry.remote.Post
 import kotlin.math.ln
 import kotlin.math.pow
 

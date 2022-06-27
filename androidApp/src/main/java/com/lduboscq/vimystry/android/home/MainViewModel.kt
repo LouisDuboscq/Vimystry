@@ -5,13 +5,15 @@ import androidx.lifecycle.viewModelScope
 import com.lduboscq.vimystry.android.SortPostsByDate
 import com.lduboscq.vimystry.domain.Post
 import com.lduboscq.vimystry.domain.PostsService
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -26,7 +28,7 @@ class MainViewModel(
     private val sortPostsByDate = SortPostsByDate()
 
     data class ViewState(
-        val loading: Boolean = false,
+        val loading: Boolean = true,
         val currentPost: Post? = null,
         val posts: List<Post> = emptyList(),
         val pausedState: Boolean = false,
@@ -54,6 +56,12 @@ class MainViewModel(
     private val remotePosts: Flow<List<Post>> = postsService.pollPosts()
         .onEach { index.value = 0 }
         .map { sortPostsByDate(it) }
+        .flowOn(Dispatchers.IO)
+        .catch { exception ->
+            viewModelScope.launch {
+                _errors.send(ViewEffect.Error(exception.message ?: exception.javaClass.name))
+            }
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {

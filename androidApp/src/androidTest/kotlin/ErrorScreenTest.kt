@@ -20,5 +20,4 @@ class ErrorScreenTest {
 
         composeTestRule.onNodeWithText("Error\n$error").assertIsDisplayed()
     }
-
 }

@@ -21,6 +21,7 @@ class PostsGraphQLApi : PostsService {
     }
 
     override suspend fun getPosts(): List<Post> {
+        // throw NoBackendDataException() // uncomment to see error screen
         val response = apolloClient.query(GetPostsQuery()).execute()
         return response.dataAssertNoErrors
             .posts

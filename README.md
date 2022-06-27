@@ -27,6 +27,12 @@ the media is resumed
 
 There are a “Loading” state during data load and an “Error” state if a failure occur
 
+If you want to simulate an error in fetching data uncomment and show error screen, then uncomment this in [PostsGraphQLApi](shared/src/commonMain/kotlin/com/lduboscq/vimystry/remote/PostsGraphQLApi.kt) :
+
+```
+// throw NoBackendDataException()
+```
+
 Any update from the remote dataset result in the player being reloaded with new content (current
 refresh is 5 min defined
 in [PostsGraphQLApi](shared/src/commonMain/kotlin/com/lduboscq/vimystry/remote/PostsGraphQLApi.kt))

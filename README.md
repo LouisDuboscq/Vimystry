@@ -2,6 +2,10 @@
 
 Vimystry is an simple app displaying videos in a story
 
+## Demo 
+
+[Find the recorded demo here](art/demo.mp4)
+
 ## Features
 
 There's a main screen with a full screen player. It immediately starts playing videos. Once ready
@@ -37,7 +41,7 @@ Any update from the remote dataset result in the player being reloaded with new 
 refresh is 5 min defined
 in [PostsGraphQLApi](shared/src/commonMain/kotlin/com/lduboscq/vimystry/remote/PostsGraphQLApi.kt))
 
-## You will find in this repository :
+## Techs
 
 - Kotlin min sdk 21
 - Kotlin multiplatform library
@@ -52,3 +56,11 @@ in [PostsGraphQLApi](shared/src/commonMain/kotlin/com/lduboscq/vimystry/remote/P
 - Apollo GraphQL for the remote communication
 - Koin for the multiplatform dependency injection framework
 - Kotlin Coroutines (suspend function, flow, scopes)
+
+## License
+
+Vimystry is under MIT license, you can do almost anything you want like making and distributing closed source versions of the project. Find the license [here](./LICENSE).
+
+## Project views 
+
+<img align="left" src = "https://profile-counter.glitch.me/Vimystry/count.svg" alt ="Loading"> 

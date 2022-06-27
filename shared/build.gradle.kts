@@ -2,6 +2,7 @@ plugins {
     kotlin("multiplatform")
     kotlin("native.cocoapods")
     id("com.android.library")
+    id("com.apollographql.apollo3").version("3.3.2")
 }
 
 version = "1.0"
@@ -29,6 +30,7 @@ kotlin {
             dependencies {
                 implementation("io.insert-koin:koin-core:$koin_version")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.3")
+                implementation("com.apollographql.apollo3:apollo-runtime:3.3.2")
             }
         }
         val commonTest by getting {
@@ -69,4 +71,8 @@ android {
         minSdk = 21
         targetSdk = 32
     }
+}
+
+apollo {
+    packageName.set("com.lduboscq.vimystry")
 }

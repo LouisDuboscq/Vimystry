@@ -1,0 +1,129 @@
+input UserOrderByInput {
+  id: SortOrder
+
+  name: SortOrder
+
+  avatar: SortOrder
+}
+
+type RootQuery {
+  comment("" id: Int): Comment
+
+  comments("" where: CommentWhereInput = "map[]", "" orderBy: [CommentOrderByInput] = "[]", "" limit: Int = -1, "" offset: Int = 0): [Comment]
+
+  post("" id: Int): Post
+
+  posts("" limit: Int = -1, "" offset: Int = 0, "" where: PostWhereInput = "map[]", "" orderBy: [PostOrderByInput] = "[]"): [Post]
+
+  user("" id: Int): User
+
+  users("" where: UserWhereInput = "map[]", "" orderBy: [UserOrderByInput] = "[]", "" limit: Int = -1, "" offset: Int = 0): [User]
+}
+
+input PostWhereInput {
+  createdAt: StringOp
+
+  fileURL: StringOp
+
+  id: StringOp
+
+  likes: IntOp
+}
+
+input IntOp {
+  gt: Int
+
+  gte: Int
+
+  eq: Int
+
+  ne: Int
+
+  lt: Int
+
+  lte: Int
+}
+
+input PostOrderByInput {
+  comments: SortOrder
+
+  createdAt: SortOrder
+
+  fileURL: SortOrder
+
+  author: SortOrder
+
+  id: SortOrder
+
+  likes: SortOrder
+}
+
+input StringOp {
+  eq: String
+
+  ne: String
+
+  contains: String
+
+  startsWith: String
+
+  endsWith: String
+}
+
+type User {
+  avatar: String
+
+  id: String
+
+  name: String
+}
+
+input CommentWhereInput {
+  body: StringOp
+}
+
+input CommentOrderByInput {
+  body: SortOrder
+
+  post: SortOrder
+}
+
+input UserWhereInput {
+  name: StringOp
+
+  avatar: StringOp
+
+  id: StringOp
+}
+
+enum SortOrder {
+  asc
+
+  desc
+}
+
+type Post {
+  author: User
+
+  comments: [Comment]
+
+  createdAt: String
+
+  fileURL: String
+
+  id: String
+
+  likes: Int
+}
+
+type Comment {
+  body: String
+
+  id: Int
+
+  post: Post
+}
+
+schema {
+  query: RootQuery
+}

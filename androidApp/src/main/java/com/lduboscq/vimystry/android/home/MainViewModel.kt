@@ -2,9 +2,9 @@ package com.lduboscq.vimystry.android.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lduboscq.vimystry.android.SortPostsByDate
 import com.lduboscq.vimystry.domain.Post
 import com.lduboscq.vimystry.domain.PostsService
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,24 +12,24 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlin.Exception
 
 class MainViewModel(
     private val postsService: PostsService
 ) : ViewModel() {
 
+    private val sortPostsByDate = SortPostsByDate()
+
     data class ViewState(
         val loading: Boolean = false,
         val currentPost: Post? = null,
+        val posts: List<Post> = emptyList(),
         val pausedState: Boolean = false,
-        var currentPostIndex: Int = 0,
-        val posts: List<Post> = emptyList()
     )
 
     sealed interface ViewEffect {
@@ -48,92 +48,48 @@ class MainViewModel(
 
     private val _errors: Channel<ViewEffect.Error> = Channel()
     val errors = _errors.receiveAsFlow()
-/*
-    val uiState = postsService.pollPosts()
-        .map {
-            ViewState(
-                loading = false,
-                pausedState = false,
-                currentPost = it.firstOrNull(),
-                posts = it,
-                currentPostIndex = 0
-            )
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ViewState())
-*/
-/*
-    data class PauseAndIndex(
-        val pausedState: Boolean = false,
-        val currentPostIndex: Int = 0
-    )
 
-    private val pauseAndIndex = MutableStateFlow(PauseAndIndex())
+    private val index = MutableStateFlow(0)
 
     private val remotePosts: Flow<List<Post>> = postsService.pollPosts()
-        .onEach {
-            pauseAndIndex.value = pauseAndIndex.value.copy(
-                currentPostIndex = 0,
-                pausedState = false
-            )
-        }
+        .onEach { index.value = 0 }
+        .map { sortPostsByDate(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {
-        remotePosts.combine(pauseAndIndex) { posts, pai ->
+        remotePosts.combine(index) { posts, _index ->
             _uiState.value = currentState.copy(
                 posts = posts,
-                currentPost = posts[pai.currentPostIndex],
-                loading = false
+                currentPost = try {
+                    posts[_index]
+                } catch (e: IndexOutOfBoundsException) {
+                    null
+                },
+                loading = false,
+                pausedState = false
             )
-        }*/
-    init {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val posts: List<Post> = postsService.getPosts()
-                _uiState.value = currentState.copy(
-                    posts = posts,
-                    currentPost = posts.firstOrNull()
-                )
-            } catch (e: Exception) {
-                viewModelScope.launch(Dispatchers.Main) {
-                    _errors.send(ViewEffect.Error(e.message ?: ""))
-                }
-            }
-        }
+        }.launchIn(viewModelScope)
     }
 
     fun nextVideo() {
-        if (currentState.posts.isNotEmpty() &&
-            currentState.currentPostIndex != currentState.posts.size - 1
+        if (currentState.posts.isNotEmpty()
+            && index.value != currentState.posts.size - 1
         ) {
-            val newIndex = currentState.currentPostIndex + 1
-            _uiState.value = currentState.copy(
-                currentPostIndex = newIndex,
-                currentPost = currentState.posts[newIndex]
-            )
+            index.value = index.value + 1
         }
     }
 
     fun previousVideo() {
-        var newIndex = currentState.currentPostIndex - 1
+        var newIndex = index.value - 1
         if (newIndex < 0) {
             newIndex = 0
         }
-
-        val post = try {
-            currentState.posts[newIndex]
-        } catch (e: IndexOutOfBoundsException) {
-            null
-        }
-
-        _uiState.value = currentState.copy(
-            currentPostIndex = newIndex,
-            currentPost = post
-        )
+        index.value = newIndex
     }
 
     fun userLongPressed() {
-        _uiState.value = currentState.copy(pausedState = !currentState.pausedState)
+        _uiState.value =
+            _uiState.value.copy(pausedState = !uiState.value.pausedState)
         viewModelScope.launch {
             _playPause.send(ViewEffect.PlayPause)
         }

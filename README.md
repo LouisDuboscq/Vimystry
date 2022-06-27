@@ -47,7 +47,8 @@ in [PostsGraphQLApi](shared/src/commonMain/kotlin/com/lduboscq/vimystry/remote/P
 - Coroutines (suspend functions, flow, scopes)
 - ExoPlayer for the video streaming player
 - Jetpack Compose for the ui
-- Jetpack Compose tests
-- Unit tests
+- Jetpack Compose tests ([ErrorScreenTest](androidApp/src/androidTest/kotlin/ErrorScreenTest.kt))
+- Unit tests ([ShortenLikesTest](shared/src/androidTest/kotlin/com/lduboscq/vimystry/ShortenLikesTest.kt), [MainViewModelTest](androidApp/src/test/kotlin/MainViewModelTest.kt), [SortPostsByDateTest](androidApp/src/test/kotlin/SortPostsByDateTest.kt), [TestKoinGraph](androidApp/src/test/kotlin/TestKoinGraph.kt))
 - Apollo GraphQL for the remote communication
 - Koin for the multiplatform dependency injection framework
+- Kotlin Coroutines (suspend function, flow, scopes)

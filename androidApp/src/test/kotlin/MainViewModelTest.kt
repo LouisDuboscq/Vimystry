@@ -1,15 +1,20 @@
-import com.lduboscq.vimystry.domain.GetPostsService
 import com.lduboscq.vimystry.android.home.MainViewModel
-import com.lduboscq.vimystry.remote.Post
-import com.lduboscq.vimystry.remote.User
+import com.lduboscq.vimystry.domain.Post
+import com.lduboscq.vimystry.domain.PostsService
+import com.lduboscq.vimystry.domain.User
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModelTest {
 
     @ExperimentalCoroutinesApi
@@ -18,16 +23,16 @@ class MainViewModelTest {
 
     @Test
     fun userTappedLeftAndRightForEmptyListTest() {
-        val viewModel = MainViewModel(getPostsService = createPostService(emptyList()))
-        assertEquals(0, viewModel.uiState.value.currentPostIndex)
+        val viewModel = MainViewModel(postsService = createPostService(emptyList()))
+        assertNull(viewModel.uiState.value.currentPost)
         viewModel.previousVideo()
-        assertEquals(0, viewModel.uiState.value.currentPostIndex)
+        assertNull(viewModel.uiState.value.currentPost)
         viewModel.nextVideo()
-        assertEquals(0, viewModel.uiState.value.currentPostIndex)
+        assertNull(viewModel.uiState.value.currentPost)
     }
 
     @Test
-    fun userTappedRightWithAtTheEndTest() = runBlocking {
+    fun userTappedRightWithAtTheEndTest() = runTest {
         val post = Post(
             id = 0,
             createdAt = "2022-08-15T15:09:43Z",
@@ -39,18 +44,16 @@ class MainViewModelTest {
                 title = "d7zesKQgVL"
             )
         )
-        val viewModel = MainViewModel(getPostsService = createPostService(listOf(post)))
+        val viewModel = MainViewModel(postsService = createPostService(listOf(post)))
         delay(300) // else init not called ?
-        assertTrue(viewModel.uiState.value.posts.isNotEmpty())
-        assertEquals(0, viewModel.uiState.value.currentPostIndex)
-        assertEquals(post, viewModel.uiState.value.currentPost)
+        assertTrue(viewModel.uiState.first().posts.isNotEmpty())
+        assertEquals(post, viewModel.uiState.first().currentPost)
         viewModel.nextVideo()
-        assertEquals(0, viewModel.uiState.value.currentPostIndex)
         assertEquals(post, viewModel.uiState.value.currentPost)
     }
 
     @Test
-    fun userTappedLeftAndRightWithAListTest() = runBlocking {
+    fun userTappedLeftAndRightWithAListTest() = runTest {
         val post = Post(
             id = 0,
             createdAt = "2022-08-15T15:09:43Z",
@@ -73,20 +76,18 @@ class MainViewModelTest {
                 title = "d7zesKQgUL"
             )
         )
-        val viewModel = MainViewModel(getPostsService = createPostService(listOf(post, post2)))
+        val viewModel = MainViewModel(postsService = createPostService(listOf(post, post2)))
         delay(300) // else init not called ?
         assertTrue(viewModel.uiState.value.posts.isNotEmpty())
-        assertEquals(0, viewModel.uiState.value.currentPostIndex)
         assertEquals(post, viewModel.uiState.value.currentPost)
         viewModel.nextVideo()
-        assertEquals(1, viewModel.uiState.value.currentPostIndex)
         assertEquals(post2, viewModel.uiState.value.currentPost)
         viewModel.previousVideo()
-        assertEquals(0, viewModel.uiState.value.currentPostIndex)
         assertEquals(post, viewModel.uiState.value.currentPost)
     }
 
-    private fun createPostService(list: List<Post>): GetPostsService = object : GetPostsService {
-        override suspend fun invoke(): List<Post> = list
+    private fun createPostService(list: List<Post>): PostsService = object : PostsService {
+        override suspend fun getPosts(): List<Post> = list
+        override fun pollPosts(): Flow<List<Post>> = flow {}
     }
 }

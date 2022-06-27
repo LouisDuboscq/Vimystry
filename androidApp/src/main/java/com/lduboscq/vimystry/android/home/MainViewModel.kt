@@ -58,7 +58,7 @@ class MainViewModel(
         .map { sortPostsByDate(it) }
         .flowOn(Dispatchers.IO)
         .catch { exception ->
-            viewModelScope.launch {
+            viewModelScope.launch(Dispatchers.Main) {
                 _errors.send(ViewEffect.Error(exception.message ?: exception.javaClass.name))
             }
         }
@@ -96,9 +96,8 @@ class MainViewModel(
     }
 
     fun userLongPressed() {
-        _uiState.value =
-            _uiState.value.copy(pausedState = !uiState.value.pausedState)
-        viewModelScope.launch {
+        _uiState.value = _uiState.value.copy(pausedState = !uiState.value.pausedState)
+        viewModelScope.launch(Dispatchers.Main) {
             _playPause.send(ViewEffect.PlayPause)
         }
     }

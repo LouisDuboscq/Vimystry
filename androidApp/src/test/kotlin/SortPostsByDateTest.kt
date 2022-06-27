@@ -1,6 +1,6 @@
 import com.lduboscq.vimystry.android.SortPostsByDate
-import com.lduboscq.vimystry.remote.Post
-import com.lduboscq.vimystry.remote.User
+import com.lduboscq.vimystry.domain.Post
+import com.lduboscq.vimystry.domain.User
 import org.junit.Test
 import kotlin.test.assertEquals
 
